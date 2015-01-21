@@ -35,9 +35,18 @@ typedef struct {
   int z;
 } three_d_space;
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 int adxl345_init(char *device, char sdo, adxl345_datarate rate);
 int adxl345_default_init(void);
 int adxl345_read_values(three_d_space *acceleration);
 int adxl345_finish(void);
+
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif // ADXL345_H
