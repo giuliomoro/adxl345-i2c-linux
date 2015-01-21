@@ -85,7 +85,7 @@ int adxl345_default_init(void)
   return adxl345_init(I2C_DEVICE_0, ADXL345_ADDR_LOW, ADXL345_DATARATE_12_5_HZ);
 }
 
-int adxl345_read_values(three_d_space *acceleration)
+int adxl345_get_acceleration(three_d_space *acceleration)
 {
   unsigned char values[6];
 

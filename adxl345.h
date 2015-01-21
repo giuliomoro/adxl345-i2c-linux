@@ -41,7 +41,7 @@ extern "C" {
 
 int adxl345_init(char *device, char sdo, adxl345_datarate rate);
 int adxl345_default_init(void);
-int adxl345_read_values(three_d_space *acceleration);
+int adxl345_get_acceleration(three_d_space *acceleration);
 int adxl345_finish(void);
 
 

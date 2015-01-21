@@ -7,7 +7,7 @@ int main(void)
 
   adxl345_default_init();
   while (1) {
-    adxl345_read_values(&acceleration);
+    adxl345_get_acceleration(&acceleration);
     printf("x:%d y:%d z:%d\n", acceleration.x, acceleration.y, acceleration.z);
   }
   
