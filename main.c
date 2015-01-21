@@ -3,14 +3,14 @@
 
 int main(void)
 {
-  int x, y, z;
+  three_d_space acceleration;
 
-  adxl345_init();
+  adxl345_default_init();
   while (1) {
-    adxl345_read_values(&x, &y, &z);
-    printf("x:%d y:%d z:%d\n", x, y, z);
+    adxl345_read_values(&acceleration);
+    printf("x:%d y:%d z:%d\n", acceleration.x, acceleration.y, acceleration.z);
   }
-
+  
   adxl345_finish();
 
   return 0;

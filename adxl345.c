@@ -8,13 +8,7 @@
 
 #include "adxl345.h"
 
-#define DEVICES "/dev/i2c-0"
-
-#define I2C_ADDR  0x1d
-#define I2C_WRITE 0x3a
-#define I2C_READ  0x3b
-
-#define BW_RATE     0x2C
+#define BW_RATE     0x2c
 #define POWER_CTL   0x2d
 #define INT_SOURCE  0x30
 #define DATA_FORMAT 0x31
@@ -24,15 +18,15 @@
 
 static int fd;
 
-static int adxl345_open(void)
+static int adxl345_open(char *device, char sdo)
 {
-  if ((fd = open(DEVICES, O_RDWR)) < 0) {
+  if ((fd = open(device, O_RDWR)) < 0) {
     printf("Faild to open i2c port\n");
     exit(-1);
     return 0;
   }
 
-  if (ioctl(fd, I2C_SLAVE, I2C_ADDR) < 0) {
+  if (ioctl(fd, I2C_SLAVE, sdo) < 0) {
     printf("Unable to get bus access to talk to slave\n");
     return 0;
   }
@@ -76,17 +70,22 @@ static int adxl345_read(unsigned char addr, int num_byte, unsigned char *data)
   return 0;
 }
 
-int adxl345_init(void)
+int adxl345_init(char *device, char sdo, adxl345_datarate rate)
 {
-  adxl345_open();
+  adxl345_open(device, sdo);
   adxl345_write(POWER_CTL, 0x08); // 測定モード
   adxl345_write(DATA_FORMAT, 0x03); // 16g
-  adxl345_write(BW_RATE, 0x07); // 12.5Hz
+  adxl345_write(BW_RATE, rate); 
 
   return 0;
 }
 
-int adxl345_read_values(int *x, int *y, int *z)
+int adxl345_default_init(void)
+{
+  return adxl345_init(I2C_DEVICE_0, ADXL345_ADDR_LOW, ADXL345_DATARATE_12_5_HZ);
+}
+
+int adxl345_read_values(three_d_space *acceleration)
 {
   unsigned char values[6];
 
@@ -96,9 +95,9 @@ int adxl345_read_values(int *x, int *y, int *z)
 
   adxl345_read(DATAX0, 6, values);
 
-  *x  = ((int) values[1] << 8) | (int) values[0];
-  *y  = ((int) values[3] << 8) | (int) values[2];
-  *z  = ((int) values[5] << 8) | (int) values[4];
+  acceleration->x  = ((int) values[1] << 8) | (int) values[0];
+  acceleration->y  = ((int) values[3] << 8) | (int) values[2];
+  acceleration->z  = ((int) values[5] << 8) | (int) values[4];
 
   return 0;
 }
