@@ -22,19 +22,18 @@ static int adxl345_open(char *device, char sdo)
 {
   if ((fd = open(device, O_RDWR)) < 0) {
     printf("Faild to open i2c port\n");
-    exit(-1);
-    return 0;
+    exit(1);
   }
 
   if (ioctl(fd, I2C_SLAVE, sdo) < 0) {
     printf("Unable to get bus access to talk to slave\n");
-    return 0;
+    exit(1);
   }
 
   return fd;
 }
 
-static int adxl345_write(unsigned char addr, unsigned char data)
+static void adxl345_write(unsigned char addr, unsigned char data)
 {
   unsigned char buf[2];
 
@@ -43,13 +42,11 @@ static int adxl345_write(unsigned char addr, unsigned char data)
 
   if (write(fd, buf, 2) != 2) {
     fprintf(stderr, "Error writing to i2c slave\n");
-    return 1;
+    exit(1);
   }
-
-  return 0;
 }
 
-static int adxl345_read(unsigned char addr, int num_byte, unsigned char *data)
+static void adxl345_read(unsigned char addr, int num_byte, unsigned char *data)
 {
   int i;
 
@@ -57,36 +54,33 @@ static int adxl345_read(unsigned char addr, int num_byte, unsigned char *data)
     /* write address */
     if (write(fd, &addr, 1) != 1) {
       fprintf(stderr, "Error writing to i2c slave\n");
-      return 1;
+      exit(1);
     }
 
     /* read data */
     if (read(fd, &data[i], 1) != 1) {
       fprintf(stderr, "Error reading from i2c slave\n");
-      return 1;
+      exit(1);
     }
   }
-
-  return 0;
 }
 
-int adxl345_init(char *device, char sdo, adxl345_datarate rate)
+void adxl345_init(char *device, char sdo, adxl345_datarate rate)
 {
   adxl345_open(device, sdo);
   adxl345_write(POWER_CTL, 0x08); // 測定モード
   adxl345_write(DATA_FORMAT, 0x03); // 16g
   adxl345_write(BW_RATE, rate); 
-
-  return 0;
 }
 
-int adxl345_default_init(void)
+void adxl345_default_init(void)
 {
-  return adxl345_init(I2C_DEVICE_0, ADXL345_ADDR_LOW, ADXL345_DATARATE_12_5_HZ);
+  adxl345_init(I2C_DEVICE_0, ADXL345_ADDR_LOW, ADXL345_DATARATE_12_5_HZ);
 }
 
-int adxl345_get_acceleration(three_d_space *acceleration)
+three_d_space* adxl345_get_acceleration(void)
 {
+  static three_d_space acceleration;
   unsigned char values[6];
 
   for (values[0] = 0; !(values[0] & DATA_READY); ) {
@@ -95,16 +89,14 @@ int adxl345_get_acceleration(three_d_space *acceleration)
 
   adxl345_read(DATAX0, 6, values);
 
-  acceleration->x  = ((int) values[1] << 8) | (int) values[0];
-  acceleration->y  = ((int) values[3] << 8) | (int) values[2];
-  acceleration->z  = ((int) values[5] << 8) | (int) values[4];
+  acceleration.x  = ((int) values[1] << 8) | (int) values[0];
+  acceleration.y  = ((int) values[3] << 8) | (int) values[2];
+  acceleration.z  = ((int) values[5] << 8) | (int) values[4];
 
-  return 0;
+  return &acceleration;
 }
 
-int adxl345_finish(void)
+void adxl345_finish(void)
 {
   close(fd);
-
-  return 0;
 }

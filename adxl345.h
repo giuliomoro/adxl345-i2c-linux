@@ -39,11 +39,10 @@ typedef struct {
 extern "C" {
 #endif /* __cplusplus */
 
-int adxl345_init(char *device, char sdo, adxl345_datarate rate);
-int adxl345_default_init(void);
-int adxl345_get_acceleration(three_d_space *acceleration);
-int adxl345_finish(void);
-
+void adxl345_init(char *device, char sdo, adxl345_datarate rate);
+void adxl345_default_init(void);
+three_d_space* adxl345_get_acceleration(void);
+void adxl345_finish(void);
 
 #ifdef __cplusplus
 }
